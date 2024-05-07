@@ -227,3 +227,36 @@ class Graphics {
     }
 }; // class Graphics
 
+// --------------------------------------------------------------------
+
+function el(name) {
+    return document.getElementById(name);
+}
+
+function now() {
+    return performance.now();
+}
+
+function randu(n) {
+    return Math.floor(Math.random() * n);
+}
+
+function padnum(num, len, radix) {
+    return Math.floor(num).toString(radix).padStart(len,"0");
+}
+function hex2(num) { return padnum(num, 2, 16); }
+
+function zmod(x, m) {
+    if (x >= 0) return x % m;
+    let r = (-x) % m;
+    if (r > 0) r = m - r;
+    return r;
+}
+
+function munge_config() {
+    for (const [key,value] of Object.entries(config)) {
+        if (key.substr(0,6) == "color_")
+            config[key] = new Color(config[key]);
+    }
+}
+
