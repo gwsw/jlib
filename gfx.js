@@ -29,6 +29,9 @@ class Color {
 // --------------------------------------------------------------------
 class Point {
     constructor(x,y) {
+        this.move(x,y);
+    }
+    move(x,y) {
         this.x = x;
         this.y = y;
     }
