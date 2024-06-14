@@ -36,13 +36,17 @@ class Point {
         this.y = y;
     }
     dist(pt) {
+        return Math.sqrt(this.dist2(pt));
+    }
+    dist2(pt) {
         const dx = pt.x - this.x;
         const dy = pt.y - this.y;
-        return Math.sqrt(dx*dx + dy*dy);
+        return (dx*dx + dy*dy);
     }
     toward(pt, dist) {
         const pdist = this.dist(pt);
-        if (pdist == 0) return pt;
+        const eps = .01; // FIXME
+        if (pdist < eps) return pt; 
         const frac = dist / pdist;
         const nx = this.x + frac * (pt.x - this.x);
         const ny = this.y + frac * (pt.y - this.y);
@@ -72,7 +76,10 @@ class Point {
 class Graphics {
     constructor(ctx, font_size) {
         this.ctx = ctx;
-        ctx.font = Math.floor(font_size).toString()+"px sans-serif";
+        this.set_font_size(font_size);
+    }
+    set_font_size(font_size) {
+        this.ctx.font = Math.floor(font_size).toString()+"px sans-serif";
         this.font_height = font_size;
     }
     clear(color) {
