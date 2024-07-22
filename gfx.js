@@ -83,11 +83,13 @@ class Graphics {
         this.font_height = font_size;
     }
     clear(color) {
+        const dims = this.canvas_dims();
+        this.ctx.clearRect(0, 0, dims.w, dims.h);
+        this.draw_rect(0, 0, dims.w, dims.h, color);
+    }
+    canvas_dims() {
         const canvas = this.ctx.canvas;
-        const w = canvas.width;
-        const h = canvas.height;
-        this.ctx.clearRect(0, 0, w, h);
-        this.draw_rect(0, 0, w, h, color);
+        return { w : canvas.width, h : canvas.height };
     }
     draw_rect(x, y, w, h, color) {
         if (color != undefined && color != null) this.ctx.fillStyle = color.jstring();
@@ -232,6 +234,21 @@ class Graphics {
         y += (h - msg_size.height) / 2;
         return this.draw_paragraph(msg, x, y, w, color, center, list_char);
     }
+   // just < 0 => left justify
+   // just > 0 => right justify
+   // just == 0 => centered
+   draw_just_text(x, y, w, text, just, color, color_shadow = null) {
+       const text_size = this.measure_text(text);
+       let nx = x;
+       if (just == 0)
+           nx = x + (w - text_size.width) / 2;
+       else if (just > 0)
+           nx = x + w - text_size.width;
+       if (nx > x) x = nx;
+       if (color_shadow != null) this.draw_text(x+config.shadow_shift, y+config.shadow_shift, text, color_shadow);
+       this.draw_text(x, y, text, color);
+       return text_size;
+   }
 }; // class Graphics
 
 // --------------------------------------------------------------------
