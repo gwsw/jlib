@@ -8,6 +8,17 @@ class Color {
     hex() {
         return this.hex_str;
     }
+   fade(color2, frac) {
+       if (frac <= 0) return this;
+       if (frac >= 1) return color2;
+       let color_str = "";
+       for (let c = 0; c <= 2; ++c) {
+           const c1 = this.get_comp(c);
+           const c2 = color2.get_comp(c);
+           color_str += hex2(c1 + ((c2-c1) * frac));
+       }
+       return new Color(color_str);
+   }
     jstring() {
         return "#" + this.hex_str;
     }
