@@ -5,26 +5,32 @@ class Color {
     constructor(hex) {
         this.hex_str = hex;
     }
+    static new_rgb(r,g,b) {
+        return new Color(hex2(r) + hex2(g) + hex2(b));
+    }
     hex() {
         return this.hex_str;
     }
-   fade(color2, frac) {
-       if (frac <= 0) return this;
-       if (frac >= 1) return color2;
-       let color_str = "";
-       for (let c = 0; c <= 2; ++c) {
-           const c1 = this.get_comp(c);
-           const c2 = color2.get_comp(c);
-           color_str += hex2(c1 + ((c2-c1) * frac));
-       }
-       return new Color(color_str);
-   }
+    fade(color2, frac) {
+        if (frac <= 0) return this;
+        if (frac >= 1) return color2;
+        let color_str = "";
+        for (let c = 0; c <= 2; ++c) {
+            const c1 = this.get_comp(c);
+            const c2 = color2.get_comp(c);
+            color_str += hex2(c1 + ((c2-c1) * frac));
+        }
+        return new Color(color_str);
+    }
     jstring() {
         return "#" + this.hex_str;
     }
     get_comp(comp) {
         return parseInt(this.hex_str.substr(comp*2, 2), 16);
     }
+    red() { return this.get_comp(0); }
+    green() { return this.get_comp(1); }
+    blue() { return this.get_comp(2); }
     darker(mult) {
         return new Color(hex2(this.get_comp(0)*mult) + hex2(this.get_comp(1)*mult) + hex2(this.get_comp(2)*mult));
     }
