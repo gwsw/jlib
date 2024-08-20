@@ -295,7 +295,11 @@ function zmod(x, m) {
 }
 
 function munge_config() {
+    const params = new URLSearchParams(window.location.search);
     for (const [key,value] of Object.entries(config)) {
+        const repl = params.get(key);
+        if (repl != null)
+            config[key] = typeof config[key] == "string" ? repl : Number(repl);
         if (key.substr(0,6) == "color_")
             config[key] = new Color(config[key]);
     }
