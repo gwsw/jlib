@@ -5,8 +5,22 @@ class Color {
     constructor(hex) {
         this.hex_str = hex;
     }
+    static new_rgb(r,g,b) {
+        return new Color(hex2(r) + hex2(g) + hex2(b));
+    }
     hex() {
         return this.hex_str;
+    }
+    fade(color2, frac) {
+        if (frac <= 0) return this;
+        if (frac >= 1) return color2;
+        let color_str = "";
+        for (let c = 0; c <= 2; ++c) {
+            const c1 = this.get_comp(c);
+            const c2 = color2.get_comp(c);
+            color_str += hex2(c1 + ((c2-c1) * frac));
+        }
+        return new Color(color_str);
     }
     jstring() {
         return "#" + this.hex_str;
@@ -14,6 +28,9 @@ class Color {
     get_comp(comp) {
         return parseInt(this.hex_str.substr(comp*2, 2), 16);
     }
+    red() { return this.get_comp(0); }
+    green() { return this.get_comp(1); }
+    blue() { return this.get_comp(2); }
     darker(mult) {
         return new Color(hex2(this.get_comp(0)*mult) + hex2(this.get_comp(1)*mult) + hex2(this.get_comp(2)*mult));
     }
@@ -88,11 +105,13 @@ class Graphics {
         return Number(s[0]);
     }
     clear(color) {
+        const dims = this.canvas_dims();
+        this.ctx.clearRect(0, 0, dims.w, dims.h);
+        this.draw_rect(0, 0, dims.w, dims.h, color);
+    }
+    canvas_dims() {
         const canvas = this.ctx.canvas;
-        const w = canvas.width;
-        const h = canvas.height;
-        this.ctx.clearRect(0, 0, w, h);
-        this.draw_rect(0, 0, w, h, color);
+        return { w : canvas.width, h : canvas.height };
     }
     draw_rect(x, y, w, h, color) {
         if (color != undefined && color != null) this.ctx.fillStyle = color.jstring();
@@ -237,6 +256,21 @@ class Graphics {
         y += (h - msg_size.height) / 2;
         return this.draw_paragraph(msg, x, y, w, color, center, list_char);
     }
+   // just < 0 => left justify
+   // just > 0 => right justify
+   // just == 0 => centered
+   draw_just_text(x, y, w, text, just, color, color_shadow = null) {
+       const text_size = this.measure_text(text);
+       let nx = x;
+       if (just == 0)
+           nx = x + (w - text_size.width) / 2;
+       else if (just > 0)
+           nx = x + w - text_size.width;
+       if (nx > x) x = nx;
+       if (color_shadow != null) this.draw_text(x+config.shadow_shift, y+config.shadow_shift, text, color_shadow);
+       this.draw_text(x, y, text, color);
+       return text_size;
+   }
 }; // class Graphics
 
 // --------------------------------------------------------------------
@@ -266,7 +300,11 @@ function zmod(x, m) {
 }
 
 function munge_config() {
+    const params = new URLSearchParams(window.location.search);
     for (const [key,value] of Object.entries(config)) {
+        const repl = params.get(key);
+        if (repl != null)
+            config[key] = typeof config[key] == "string" ? repl : Number(repl);
         if (key.substr(0,6) == "color_")
             config[key] = new Color(config[key]);
     }
