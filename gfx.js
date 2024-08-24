@@ -76,11 +76,16 @@ class Point {
 class Graphics {
     constructor(ctx, font_size) {
         this.ctx = ctx;
-        this.set_font_size(font_size);
+        if (font_size)
+            this.set_font_size(font_size);
     }
     set_font_size(font_size) {
         this.ctx.font = Math.floor(font_size).toString()+"px sans-serif";
         this.font_height = font_size;
+    }
+    get_font_size() {
+        const s = this.ctx.font.match(/^[0-9]*/);
+        return Number(s[0]);
     }
     clear(color) {
         const canvas = this.ctx.canvas;
