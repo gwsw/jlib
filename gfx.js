@@ -41,6 +41,12 @@ class Color {
         const bright = this.get_comp(0) + this.get_comp(1) + this.get_comp(2);
         return new Color((bright > (3*128)) ? "000000" : "ffffff");
     }
+    static random(ro=0, go=0, bo=0) {
+        const r = ro + randu(256-ro);
+        const g = go + randu(256-go);
+        const b = bo + randu(256-bo);
+        return Color.new_rgb(r,g,b);
+    }
 };
 
 // --------------------------------------------------------------------
@@ -272,6 +278,36 @@ class Graphics {
        return text_size;
    }
 }; // class Graphics
+
+// --------------------------------------------------------------------
+
+async function audio_context(processor) {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audio = new AudioContext();
+    audio.resume();
+    let dev = await navigator.mediaDevices.getUserMedia({audio:true});
+    if (dev == null || dev.deviceId == '') {
+        const devs = await navigator.mediaDevices.enumerateDevices();
+        let devid = null;
+        for (let i = 0; i < devs.length; ++i) {
+            if (devs[i].kind == 'audioinput') {
+                devid = devs[i].deviceId;
+                break;
+            }
+        }
+        if (devid == null) {
+            alert("No microphone found.");
+            return null;
+        }
+        dev = await navigator.mediaDevices.getUserMedia({audio:{deviceId:{exact:devid}}});
+    }
+    const source = audio.createMediaStreamSource(dev);
+    const proc_node = audio.createScriptProcessor(256, 1, 1);
+    proc_node.onaudioprocess = processor;
+    proc_node.connect(audio.destination);
+    source.connect(proc_node);
+    return audio;
+}
 
 // --------------------------------------------------------------------
 
